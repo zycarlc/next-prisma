@@ -8,17 +8,50 @@ generator client {
   provider = "prisma-client-js"
 }
 
+// postgresql://postgres@localhost:5432/webapp_dev
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
+  // url      = "postgresql://postgres@localhost:5432/webapp_dev"
 }
 
 model Post {
-  id String @id @default(cuid())
-  content String
+  id        String   @id @default(cuid())
+  content   String
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   @@index([createdAt])
   @@map("posts")
+}
+
+model User {
+  id       String @id @default(cuid())
+  name     String
+  email    String @unique
+  password String
+}
+
+model Customer {
+  id        String @id @unique
+  name      String
+  email     String
+  image_url String
+  invoices Invoice[]
+}
+
+model Invoice {
+  id          String   @id @default(cuid())
+  customer_id String
+  customer    Customer @relation(fields: [customer_id], references: [id])
+  amount      Int
+  status      String
+  date        DateTime
+
+  @@map("invoices")
+}
+
+model Revenue {
+  month   String @id
+  revenue Int
 }

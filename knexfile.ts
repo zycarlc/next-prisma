@@ -1,5 +1,6 @@
-require('dotenv').config({ path: '.env.development' });
-import { Knex } from 'knex';
+require('dotenv').config({ path: './.env.development' });
+
+import type { Knex } from 'knex';
 
 const config: Knex.Config = {
   client: 'pg',

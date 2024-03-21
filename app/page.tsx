@@ -3,14 +3,100 @@ import { ArrowRightIcon } from '@heroicons/react/24/outline';
 import Link from 'next/link';
 import { lusitana } from './ui/fonts';
 import Image from 'next/image';
+import db from '@/modules/db';
+import { faker } from '@faker-js/faker';
+import { revalidatePath } from 'next/cache';
+import Button from '@/components/Button';
 
-export default function Page() {
+import {
+  users,
+  customers,
+  invoices,
+  revenue,
+} from '@/app/lib/placeholder-data';
+
+export default async function Page() {
+  // const posts = await db.post.findMany({ orderBy: { createdAt: 'desc' } });
+
+  const generateCustomers = async () => {
+    'use server';
+    // console.log(new Set(customers.map((customer) => customer.id)));
+
+    const result = await db.customer.createMany({
+      data: customers.map((customer) => {
+        return {
+          id: customer.id,
+          name: customer.name,
+          email: customer.email,
+          image_url: customer.image_url,
+        };
+      }),
+    });
+
+    console.log(result);
+
+    revalidatePath('/');
+  };
+
+  const generateInvoice = async () => {
+    'use server';
+    const result = await db.invoice.createMany({
+      data: invoices.map((invoice) => {
+        return {
+          customer_id: invoice.customer_id,
+          amount: invoice.amount,
+          status: invoice.status,
+          date: new Date(invoice.date),
+        };
+      }),
+      // skipDuplicates: true,
+    });
+    // const result = await db.invoice.findMany();
+    console.log(result);
+  };
+
+  const generateRevenue = async () => {
+    'use server';
+    const result = await db.revenue.createMany({
+      data: revenue,
+    });
+    console.log(result);
+  };
+
+  const generateUser = async () => {
+    'use server';
+    const user = await db.user.create({
+      data: {
+        id: users[0].id,
+        name: users[0].name,
+        email: users[0].email,
+        password: users[0].password,
+      },
+    });
+    console.log(user);
+  };
+
+  // const getUser = async () => {
+  //   const result = await db.user.findMany();
+  //   console.log(result);
+  // };
+
+  // getUser();
+
   return (
     <main className="flex min-h-screen flex-col p-6">
       <div className="flex h-20 shrink-0 items-end rounded-lg bg-blue-500 p-4 md:h-52">
         <AcmeLogo />
       </div>
-      {/* <div className="h-0 w-0 border-b-[30px] border-l-[20px] border-r-[20px] border-b-black border-l-transparent border-r-transparent" /> */}
+      <Button onClick={generateUser}>Generate User</Button>
+      <Button onClick={generateCustomers}>Generate Customers</Button>
+      <Button onClick={generateInvoice}>Generate Invoices</Button>
+      <Button onClick={generateRevenue}>Generate Revenue</Button>
+
+      {/* {posts.map((post) => (
+        <div key={post.id}>{post.content}</div>
+      ))} */}
+
       <div className="mt-4 flex grow flex-col gap-4 md:flex-row">
         <div className="flex flex-col justify-center gap-6 rounded-lg bg-gray-50 px-6 py-10 md:w-2/5 md:px-20">
           <p
